@@ -1,6 +1,6 @@
 {
     "name": "toggenation/blacklist-check",
-    "description": "Check for listing with  all.s5h.net",
+    "description": "Check for black listing against all.s5h.net",
     "type": "project",
     "license": "MIT",
     "autoload": {
@@ -15,5 +15,7 @@
         }
     ],
     "minimum-stability": "alpha",
-    "require": {}
+    "require": {
+        "monolog/monolog": "^3.9"
+    }
 }

@@ -1,16 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Monolog\Level;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class Blacklist
 {
     private $blacklist = [];
+    public Logger $logger;
 
     public function __construct(?array $blacklist)
     {
+        $this->logger = new Logger('blacklist');
+        $log = realpath(__DIR__ . '/../logs/') . '/blacklist.log';
+        // var_dump($log);
+        $streamHandler = new StreamHandler($log);
+        $streamHandler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
+        $this->logger->pushHandler($streamHandler);
+        $handler = new StreamHandler('php://stdout');
+        $handler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
+        $this->logger->pushHandler($handler);
+
+
+        $this->logger->info('Blacklist initialized');
         $this->blacklist = $blacklist;
     }
 
-    public function validIP($ip): bool
+    public function validIP(string $ip): bool
     {
         $valid = inet_pton($ip) !== false;
 
@@ -34,13 +54,11 @@ class Blacklist
     public function reverseIPV4($ip): string
     {
         if (!$this->isIpv4($ip)) {
-            throw new InvalidArgumentException("Invalid IP address");
+            throw new InvalidArgumentException("Invalid IPv4 address");
         }
 
         return implode('.', array_reverse(explode('.', $ip)));
     }
-
-
 
     public  function expandIpv6(string $ip): string
     {
@@ -52,7 +70,7 @@ class Blacklist
     public function reverseIPV6(string $ip): string
     {
         if (!$this->isIpv6($ip)) {
-            throw new InvalidArgumentException("Invalid IP address");
+            throw new InvalidArgumentException("Invalid IPv6 address");
         }
 
         $ip = $this->expandIpv6($ip);
@@ -98,14 +116,18 @@ foreach (
         "52.169.25.10",
         "::1",
         "2606:4700:3030::ac43:83e1",
-        "2603:1010:200::32c"
+        "2603:1010:200::32c",
+        "181.215.196.125",
+        "179.61.242.120",
+        "162.241.92.55"
     ] as $ip
 ) {
     $result = $blacklist->isBlacklisted($ip);
+
     if ($result['blacklisted']) {
         $blacklistName = $result['blacklist'];
-        echo "$ip is blacklisted on $blacklistName\n";
+        $blacklist->logger->warning("$ip is blacklisted on $blacklistName");
     } else {
-        echo "$ip is not blacklisted\n";
+        $blacklist->logger->info("$ip is not blacklisted");
     }
 }
