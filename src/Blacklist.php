@@ -16,8 +16,16 @@ class Blacklist
     public function __construct(?array $blacklist)
     {
         $this->logger = new Logger('blacklist');
+
+
+
+        $this->blacklist = $blacklist;
+    }
+
+    public function setupLogger(): void
+    {
         $log = realpath(__DIR__ . '/../logs/') . '/blacklist.log';
-        // var_dump($log);
+
         $streamHandler = new StreamHandler($log);
         $streamHandler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
         $this->logger->pushHandler($streamHandler);
@@ -27,9 +35,7 @@ class Blacklist
 
 
         $this->logger->info('Blacklist initialized');
-        $this->blacklist = $blacklist;
     }
-
     public function validIP(string $ip): bool
     {
         $valid = inet_pton($ip) !== false;
