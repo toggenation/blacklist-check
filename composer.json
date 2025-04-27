@@ -1,0 +1,19 @@
+{
+    "name": "toggenation/blacklist-check",
+    "description": "Check for listing with  all.s5h.net",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Toggenation\\BlacklistCheck\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "James McDonald",
+            "email": "james@toggen.com.au"
+        }
+    ],
+    "minimum-stability": "alpha",
+    "require": {}
+}
