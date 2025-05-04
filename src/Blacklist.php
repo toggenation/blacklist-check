@@ -11,31 +11,33 @@ use Monolog\Handler\StreamHandler;
 class Blacklist
 {
     private $blacklist = [];
-    public Logger $logger;
+
+    private Logger $logger;
 
     public function __construct(?array $blacklist)
     {
-        $this->logger = new Logger('blacklist');
-
-
+        $this->setupLogger();
 
         $this->blacklist = $blacklist;
     }
 
+    public function log(Level $level = Level::Debug, string $message): void
+    {
+        $this->logger->log($level, $message);
+    }
     public function setupLogger(): void
     {
+        $this->logger = new Logger('blacklist');
         $log = realpath(__DIR__ . '/../logs/') . '/blacklist.log';
-
         $streamHandler = new StreamHandler($log);
         $streamHandler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
         $this->logger->pushHandler($streamHandler);
         $handler = new StreamHandler('php://stdout');
         $handler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
         $this->logger->pushHandler($handler);
-
-
         $this->logger->info('Blacklist initialized');
     }
+
     public function validIP(string $ip): bool
     {
         $valid = inet_pton($ip) !== false;
@@ -119,8 +121,8 @@ $blacklist = new Blacklist(["all.s5h.net", "sbl.spamhaus.org"]);
 
 foreach (
     [
-        "52.169.25.10",
         "::1",
+        "52.169.25.10",
         "2606:4700:3030::ac43:83e1",
         "2603:1010:200::32c",
         "181.215.196.125",
@@ -132,8 +134,8 @@ foreach (
 
     if ($result['blacklisted']) {
         $blacklistName = $result['blacklist'];
-        $blacklist->logger->warning("$ip is blacklisted on $blacklistName");
+        $blacklist->log(Level::Warning, "$ip is blacklisted on $blacklistName");
     } else {
-        $blacklist->logger->info("$ip is not blacklisted");
+        $blacklist->log(Level::Info, "$ip is NOT blacklisted");
     }
 }
